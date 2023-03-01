@@ -2,9 +2,9 @@
  * xsalta01
  * Veranika Saltanava
  *
- * Kostra programu pro 2. projekt IZP 2022/23
+ * Programme skeleton for the 2nd IZP project 2022/23 
  *
- * Jednoducha shlukova analyza: 2D nejblizsi soused.
+ * Simple cluster analysis: 2D nearest neighbour.
  * Single linkage
  */
 #include <stdio.h>
@@ -15,10 +15,10 @@
 #include <string.h>
 
 /*****************************************************************
- * Ladici makra. Vypnout jejich efekt lze definici makra
- * NDEBUG, napr.:
- *   a) pri prekladu argumentem prekladaci -DNDEBUG
- *   b) v souboru (na radek pred #include <assert.h>
+ * Debugging macro. You can turn off their effect by defining the macro
+ * NDEBUG, for ex.:
+ *   a) in translation by the argument of the translator -DNDEBUG
+ *   b) in the file (on the line before #include <assert.h>
  *      #define NDEBUG
  */
 #ifdef NDEBUG
@@ -28,32 +28,32 @@
 #define dfloat(f)
 #else
 
-// vypise ladici retezec
+// prints the debug chain
 #define debug(s) printf("- %s\n", s)
 
-// vypise formatovany ladici vystup - pouziti podobne jako printf
+// prints formatted debug output - use similar to printf 
 #define dfmt(s, ...) printf(" - "__FILE__":%u: "s"\n",__LINE__,__VA_ARGS__)
 
-// vypise ladici informaci o promenne - pouziti dint(identifikator_promenne)
+// prints debugging information about the variable - use dint(identifier_variable)
 #define dint(i) printf(" - " __FILE__ ":%u: " #i " = %d\n", __LINE__, i)
 
-// vypise ladici informaci o promenne typu float - pouziti
-// dfloat(identifikator_promenne)
+// prints debugging information about variable of float type - usage
+// dfloat(identifier_variable)
 #define dfloat(f) printf(" - " __FILE__ ":%u: " #f " = %g\n", __LINE__, f)
 
 #endif
 
 /*****************************************************************
- * Deklarace potrebnych datovych typu:
+ * Declaration of the necessary data types:
  *
- * TYTO DEKLARACE NEMENTE
+ * DON'T CHANGE THIS DECLARATION
  *
- *   struct obj_t - struktura objektu: identifikator a souradnice
- *   struct cluster_t - shluk objektu:
- *      pocet objektu ve shluku,
- *      kapacita shluku (pocet objektu, pro ktere je rezervovano
- *          misto v poli),
- *      ukazatel na pole shluku.
+ *   struct obj_t - object structure: identifier and coordinates
+ *   struct cluster_t - a cluster of objects:
+ *       number of objects in the cluster,
+ *       the capacity of the cluster (the number of objects for which it is reserved
+ *       space in the array),
+ *       pointer to the array of the cluster.
  */
 
 struct obj_t {
@@ -69,17 +69,17 @@ struct cluster_t {
 };
 
 /*****************************************************************
- * Deklarace potrebnych funkci.
+ * Declaration of the necessary functions.
  *
- * PROTOTYPY FUNKCI NEMENTE
+ * FUNCTION PROTOTYPES ARE NOT REPLACED
  *
- * IMPLEMENTUJTE POUZE FUNKCE NA MISTECH OZNACENYCH 'TODO'
+ * ONLY IMPLEMENT FUNCTIONS IN PLACES MARKED 'TODO'.
  *
  */
 
 /*
- Inicializace shluku 'c'. Alokuje pamet pro cap objektu (kapacitu).
- Ukazatel NULL u pole objektu znamena kapacitu 0.
+ Initialization of cluster 'c'. Allocates memory for the object cap (capacity).
+ The NULL pointer to the object array indicates a capacity of 0.
 */
 void init_cluster(struct cluster_t *c, int cap)
 {
@@ -96,7 +96,7 @@ void init_cluster(struct cluster_t *c, int cap)
 }
 
 /*
- Odstraneni vsech objektu shluku a inicializace na prazdny shluk.
+ Remove all cluster objects and initialize to an empty cluster.
  */
 void clear_cluster(struct cluster_t *c)
 {
@@ -109,11 +109,12 @@ void clear_cluster(struct cluster_t *c)
 const int CLUSTER_CHUNK = 10;
 
 /*
- Zmena kapacity shluku 'c' na kapacitu 'new_cap'.
+ Change the capacity of cluster 'c' to the capacity of 'new_cap'.
  */
 struct cluster_t *resize_cluster(struct cluster_t *c, int new_cap)
 {
-    // TUTO FUNKCI NEMENTE
+  // DO NOT CHANGE THIS FUNCTION
+
     assert(c);
     assert(c->capacity >= 0);
     assert(new_cap >= 0);
@@ -133,8 +134,8 @@ struct cluster_t *resize_cluster(struct cluster_t *c, int new_cap)
 }
 
 /*
- Prida objekt 'obj' na konec shluku 'c'. Rozsiri shluk, pokud se do nej objekt
- nevejde.
+ Adds object 'obj' to the end of the 'c' stack. Expand the heap if the object
+ does not fit.
  */
 void append_cluster(struct cluster_t *c, struct obj_t obj)
 {
@@ -147,14 +148,14 @@ void append_cluster(struct cluster_t *c, struct obj_t obj)
 }
 
 /*
- Seradi objekty ve shluku 'c' vzestupne podle jejich identifikacniho cisla.
+ Serializes the objects in cluster 'c' in ascending order by their identification number.
  */
 void sort_cluster(struct cluster_t *c);
 
 /*
- Do shluku 'c1' prida objekty 'c2'. Shluk 'c1' bude v pripade nutnosti rozsiren.
- Objekty ve shluku 'c1' budou serazeny vzestupne podle identifikacniho cisla.
- Shluk 'c2' bude nezmenen.
+ Adds the 'c2' objects to the 'c1' cluster. The 'c1' cluster will be expanded if necessary.
+ The objects in the 'c1' cluster will be sorted in ascending order by the identification number.
+ Cluster 'c2' will be unchanged.
  */
 void merge_clusters(struct cluster_t *c1, struct cluster_t *c2)
 {
@@ -170,12 +171,12 @@ void merge_clusters(struct cluster_t *c1, struct cluster_t *c2)
 }
 
 /**********************************************************************/
-/* Prace s polem shluku */
+/* Working with a cluster array */
 
 /*
- Odstrani shluk z pole shluku 'carr'. Pole shluku obsahuje 'narr' polozek
- (shluku). Shluk pro odstraneni se nachazi na indexu 'idx'. Funkce vraci novy
- pocet shluku v poli.
+ Remove a cluster from the 'carr' cluster field. The cluster array contains 'narr' entries
+ (cluster). The cluster to remove is located at index 'idx'. The function returns a new
+ number of clumps in the array.
 */
 int remove_cluster(struct cluster_t *carr, int narr, int idx)
 {
@@ -193,7 +194,7 @@ int remove_cluster(struct cluster_t *carr, int narr, int idx)
 }
 
 /*
- Pocita Euklidovskou vzdalenost mezi dvema objekty.
+ It calculates the Euclidean distance between two objects.
  */
 float obj_distance(struct obj_t *o1, struct obj_t *o2)
 {
@@ -206,7 +207,7 @@ float obj_distance(struct obj_t *o1, struct obj_t *o2)
 }
 
 /*
- Pocita vzdalenost dvou shluku.
+ It calculates the distance between  two clusters.
 */
 float cluster_distance(struct cluster_t *c1, struct cluster_t *c2)
 {
@@ -234,10 +235,10 @@ float cluster_distance(struct cluster_t *c1, struct cluster_t *c2)
 }
 
 /*
- Funkce najde dva nejblizsi shluky. V poli shluku 'carr' o velikosti 'narr'
- hleda dva nejblizsi shluky. Nalezene shluky identifikuje jejich indexy v poli
- 'carr'. Funkce nalezene shluky (indexy do pole 'carr') uklada do pameti na
- adresu 'c1' resp. 'c2'.
+ The function finds the two closest clusters. In a cluster array 'carr' of size 'narr'
+ searches for the two nearest clusters. It identifies the found clusters by their indices in the array
+ 'carr'. The function stores the found clusters (indices in the 'carr' array) in memory for
+ address 'c1' and 'c2' respectively.
 */
 void find_neighbours(struct cluster_t *carr, int narr, int *c1, int *c2)
 {
@@ -259,10 +260,10 @@ void find_neighbours(struct cluster_t *carr, int narr, int *c1, int *c2)
     }
 }
 
-// pomocna funkce pro razeni shluku
+// auxiliary function for cluster sort
 static int obj_sort_compar(const void *a, const void *b)
 {
-    // TUTO FUNKCI NEMENTE
+    // DON'T CHANGE THIS FUNCTION
     const struct obj_t *o1 = (const struct obj_t *)a;
     const struct obj_t *o2 = (const struct obj_t *)b;
     if (o1->id < o2->id) return -1;
@@ -271,20 +272,20 @@ static int obj_sort_compar(const void *a, const void *b)
 }
 
 /*
- Razeni objektu ve shluku vzestupne podle jejich identifikatoru.
+ Sort the objects in the cluster in ascending order according to their identifier.
 */
 void sort_cluster(struct cluster_t *c)
 {
-    // TUTO FUNKCI NEMENTE
+    // DON'T CHANGE THIS FUNCTION
     qsort(c->obj, c->size, sizeof(struct obj_t), &obj_sort_compar);
 }
 
 /*
- Tisk shluku 'c' na stdout.
+ Print cluster 'c' to stdout.
 */
 void print_cluster(struct cluster_t *c)
 {
-    // TUTO FUNKCI NEMENTE
+    // DON'T CHANGE THIS FUNCTION
     for (int i = 0; i < c->size; i++)
     {
         if (i) putchar(' ');
@@ -295,11 +296,13 @@ void print_cluster(struct cluster_t *c)
 
 
 /*
- Ze souboru 'filename' nacte objekty. Pro kazdy objekt vytvori shluk a ulozi
- jej do pole shluku. Alokuje prostor pro pole vsech shluku a ukazatel na prvni
- polozku pole (ukalazatel na prvni shluk v alokovanem poli) ulozi do pameti,
- kam se odkazuje parametr 'arr'. Funkce vraci pocet nactenych objektu (shluku).
- V pripade nejake chyby uklada do pameti, kam se odkazuje 'arr', hodnotu NULL.
+ Retrieves objects from the file 'filename'. For each object it creates
+ a cluster and saves it into the cluster array. Allocates space for the 
+ array of all clusters and a pointer to the first position of the array 
+ (the pointer to the first cluster in the allocated array) is stored in 
+ memory, where the parameter 'arr' is referenced. The function returns 
+ the number of loaded objects (clusters). In case of an error, it stores 
+ a NULL value in the memory referenced by 'arr'.
 */
 int load_clusters(char *filename, struct cluster_t **arr)
 {
@@ -361,8 +364,8 @@ int load_clusters(char *filename, struct cluster_t **arr)
 }
 
 /*
- Tisk pole shluku. Parametr 'carr' je ukazatel na prvni polozku (shluk).
- Tiskne se prvnich 'narr' shluku.
+ Printing the cluster field. The parameter 'carr' is a pointer to the first item (cluster).
+ The first 'narr' of the cluster is printed.
 */
 void print_clusters(struct cluster_t *carr, int narr)
 {
