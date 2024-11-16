@@ -1,7 +1,4 @@
 /**
- * xsalta01
- * Veranika Saltanava
- *
  * Kostra programu pro 2. projekt IZP 2022/23
  *
  * Jednoducha shlukova analyza: 2D nejblizsi soused.
